@@ -8,24 +8,31 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiting\Limit;
 
+use App\Http\Controllers\LandingPageController;
+
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+
+
+
+
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
+
 Route::get('/', function () {
     return redirect()->route('books.index');
-
-
-
 });
 
 
 Route::resource('books', BookController::class)
-->only(['index', 'show']);
+    ->only(['index', 'show']);
 
 
 Route::resource('books.reviews', ReviewController::class)
-->scoped([ 'review' => 'book'])
-->only(['create','store']);
+    ->scoped(['review' => 'book'])
+    ->only(['create', 'store']);
 
 
 RateLimiter::for('reviews', function (Request $request) {
     return Limit::perHour(3)->by($request->user()?->id ?: $request->ip());
 });
-
